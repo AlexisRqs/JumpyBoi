@@ -150,13 +150,38 @@ platforms.add(bottom_platform)
 clock = pygame.time.Clock()
 done = False
 
-# ...
+# Create a custom event for spawning enemies
+SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
+pygame.time.set_timer(SPAWN_ENEMY_EVENT, 15000)  # 15000 milliseconds = 15 seconds
+
+# Function to display the "Game Over" message and handle restarting the game
+def game_over(screen, clock):
+    font = pygame.font.Font(None, 36)
+    text = font.render("Game Over! Press 'F' to play again.", True, WHITE)
+    text_rect = text.get_rect(center=(size[0] // 2, size[1] // 2))
+
+    while True:
+        screen.fill(BLACK)
+        screen.blit(text, text_rect)
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_f:
+                    return True
+        clock.tick(60)
 
 while not done:
     # Handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
+        elif event.type == SPAWN_ENEMY_EVENT:  # Spawn enemy every 15 seconds
+            enemy = Enemy()
+            enemies.add(enemy)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 player.change_x = -5
@@ -176,6 +201,20 @@ while not done:
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 player.change_x = 0
+
+    # Check for collisions with enemies
+    enemy_hit_list = pygame.sprite.spritecollide(player, enemies, False)
+    if enemy_hit_list:
+        # The player character dies when it collides with an enemy
+        if game_over(screen, clock):
+            # Reset the game state (player, enemies, platforms, bullets, etc.)
+            player = Player()
+            enemies.empty()
+            for i in range(5):
+                enemy = Enemy()
+                enemies.add(enemy)
+        else:
+            done = True
 
     # Update the player character, platforms, enemies, and bullets
     player.update()
