@@ -95,10 +95,41 @@ class Platform(pygame.sprite.Sprite):
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
 
-# Create the player character, platform, and enemy sprites
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction):  # Fixed method name and added x, y arguments
+        super().__init__()
+        self.image = pygame.Surface([5, 5])
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.x = x  # Set the bullet's initial position
+        self.rect.y = y  # Set the bullet's initial position
+        self.speed = 10
+        self.direction = direction
+
+    def update(self):
+        if self.direction == "left":
+            self.rect.x -= self.speed
+        elif self.direction == "right":
+            self.rect.x += self.speed
+        elif self.direction == "up":
+            self.rect.y -= self.speed
+
+        # Check for collisions with enemies
+        enemy_hit_list = pygame.sprite.spritecollide(self, enemies, True)
+        for enemy in enemy_hit_list:
+            # Remove the bullet when it hits an enemy
+            self.kill()
+
+        # Remove the bullet when it goes off screen
+        if self.rect.right < 0 or self.rect.left > 700 or self.rect.top > 500:
+            self.kill()
+
+# Create the player character, platform, and enemy sprites + bullets
 player = Player()
 platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
+
 for i in range(10):
     platform = Platform(70, 20)
     platform.rect.x = random.randint(0, 630)
@@ -119,31 +150,89 @@ platforms.add(bottom_platform)
 clock = pygame.time.Clock()
 done = False
 
+# Create a custom event for spawning enemies
+SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
+pygame.time.set_timer(SPAWN_ENEMY_EVENT, 15000)  # 15000 milliseconds = 15 seconds
+
+# Function to display the "Game Over" message and handle restarting the game
+def game_over(screen, clock):
+    font = pygame.font.Font(None, 36)
+    text = font.render("Game Over! Press 'F' to play again.", True, WHITE)
+    text_rect = text.get_rect(center=(size[0] // 2, size[1] // 2))
+
+    while True:
+        screen.fill(BLACK)
+        screen.blit(text, text_rect)
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_f:
+                    return True
+        clock.tick(60)
+
 while not done:
     # Handle events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
+        elif event.type == SPAWN_ENEMY_EVENT:  # Spawn enemy every 15 seconds
+            enemy = Enemy()
+            enemies.add(enemy)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_LEFT:
                 player.change_x = -5
             elif event.key == pygame.K_RIGHT:
                 player.change_x = 5
-            elif event.key == pygame.K_SPACE:
+            elif event.key == pygame.K_UP:
                 player.jump()
+            elif event.key == pygame.K_SPACE:  # Separate bullet firing events
+                if player.change_x > 0:
+                    direction = "right"
+                elif player.change_x < 0:
+                    direction = "left"
+                else:  # If the player is not moving, use the default direction
+                    direction = "right"
+                bullet = Bullet(player.rect.centerx, player.rect.centery, direction)
+                bullets.add(bullet)
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 player.change_x = 0
 
-    # Update the player character, platforms, and enemies
+    # Check for collisions with enemies
+    enemy_hit_list = pygame.sprite.spritecollide(player, enemies, False)
+    if enemy_hit_list:
+        # The player character dies when it collides with an enemy
+        if game_over(screen, clock):
+            # Reset the game state (player, enemies, platforms, bullets, etc.)
+            player = Player()
+            enemies.empty()
+            for i in range(5):
+                enemy = Enemy()
+                enemies.add(enemy)
+        else:
+            done = True
+
+    # Update the player character, platforms, enemies, and bullets
     player.update()
     platforms.update()
     enemies.update()
+    bullets.update()
+
+    # Check for collisions between bullets and enemies
+    for bullet in bullets:
+        enemy_hit_list = pygame.sprite.spritecollide(bullet, enemies, True)
+        for enemy in enemy_hit_list:
+            bullets.remove(bullet)
 
     # Draw the screen
     screen.fill(BLACK)
     platforms.draw(screen)
     enemies.draw(screen)
+    bullets.draw(screen)
     screen.blit(player.image, player.rect)
     pygame.display.flip()
 
