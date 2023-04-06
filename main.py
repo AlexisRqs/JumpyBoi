@@ -150,6 +150,8 @@ platforms.add(bottom_platform)
 clock = pygame.time.Clock()
 done = False
 
+# ...
+
 while not done:
     # Handle events
     for event in pygame.event.get():
@@ -163,7 +165,13 @@ while not done:
             elif event.key == pygame.K_UP:
                 player.jump()
             elif event.key == pygame.K_SPACE:  # Separate bullet firing events
-                bullet = Bullet(player.rect.centerx, player.rect.centery, "right")
+                if player.change_x > 0:
+                    direction = "right"
+                elif player.change_x < 0:
+                    direction = "left"
+                else:  # If the player is not moving, use the default direction
+                    direction = "right"
+                bullet = Bullet(player.rect.centerx, player.rect.centery, direction)
                 bullets.add(bullet)
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
