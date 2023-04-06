@@ -124,11 +124,30 @@ class Bullet(pygame.sprite.Sprite):
         if self.rect.right < 0 or self.rect.left > 700 or self.rect.top > 500:
             self.kill()
 
+class Score:
+    def __init__(self):
+        self.score = 0
+        self.font = pygame.font.Font(None, 36)
+        self.last_update = pygame.time.get_ticks()
+
+    def update(self, screen):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_update >= 1000:  # Increment score every 1 second
+            self.score += 1
+            self.last_update = current_time
+
+        score_text = self.font.render(f"Score: {self.score}", True, WHITE)
+        screen.blit(score_text, (size[0] - 200, 10))
+
+    def add_points(self, points):
+        self.score += points
+
 # Create the player character, platform, and enemy sprites + bullets
 player = Player()
 platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+score = Score()
 
 for i in range(10):
     platform = Platform(70, 20)
@@ -226,10 +245,12 @@ while not done:
     for bullet in bullets:
         enemy_hit_list = pygame.sprite.spritecollide(bullet, enemies, True)
         for enemy in enemy_hit_list:
+            score.add_points(10)  # Increment score by 10 for each enemy killed
             bullets.remove(bullet)
 
     # Draw the screen
     screen.fill(BLACK)
+    score.update(screen)
     platforms.draw(screen)
     enemies.draw(screen)
     bullets.draw(screen)
