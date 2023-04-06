@@ -142,12 +142,17 @@ class Score:
     def add_points(self, points):
         self.score += points
 
+    def reset(self):
+        self.score = 0
+        self.last_update = pygame.time.get_ticks()
+
 # Create the player character, platform, and enemy sprites + bullets
+score = Score()
 player = Player()
 platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-score = Score()
+
 
 for i in range(10):
     platform = Platform(70, 20)
@@ -229,6 +234,7 @@ while not done:
             # Reset the game state (player, enemies, platforms, bullets, etc.)
             player = Player()
             enemies.empty()
+            score.reset()
             for i in range(5):
                 enemy = Enemy()
                 enemies.add(enemy)
@@ -246,7 +252,7 @@ while not done:
         enemy_hit_list = pygame.sprite.spritecollide(bullet, enemies, True)
         for enemy in enemy_hit_list:
             score.add_points(10)  # Increment score by 10 for each enemy killed
-            bullets.remove(bullet)
+            bullets.kill()
 
     # Draw the screen
     screen.fill(BLACK)
