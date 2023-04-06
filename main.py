@@ -125,14 +125,14 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_q:
                 player.change_x = -5
-            elif event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_d:
                 player.change_x = 5
             elif event.key == pygame.K_SPACE:
                 player.jump()
         elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_q or event.key == pygame.K_d:
                 player.change_x = 0
 
     # Update the player character, platforms, and enemies
