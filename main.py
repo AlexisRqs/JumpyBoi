@@ -233,11 +233,14 @@ def pause_menu(screen, clock):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return False
-            # Pause the game
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
-                if not pause_menu(screen, clock):
-                    done = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    return True
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    return False
         clock.tick(60)
+
 
 
 # Function to display the "Game Over" message and handle restarting the game
@@ -299,7 +302,11 @@ while not done:
             enemy = Enemy()
             enemies.add(enemy)
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_p:
+                if not pause_menu(screen, clock):
+                    done = True
+                    break
+            elif event.key == pygame.K_LEFT:
                 player.change_x = -5
             elif event.key == pygame.K_RIGHT:
                 player.change_x = 5
@@ -314,14 +321,6 @@ while not done:
                     direction = "right"
                 bullet = Bullet(player.rect.centerx, player.rect.centery, direction)
                 bullets.add(bullet)
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                player.change_x = 0
-        # Pause the game
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:
-                if not pause_menu(screen, clock):
-                    done = True
 
     # Check for collisions with enemies
     enemy_hit_list = pygame.sprite.spritecollide(player, enemies, False)
