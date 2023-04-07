@@ -12,7 +12,8 @@ BLUE = (0, 0, 255)
 pygame.init()
 size = (700, 500)
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption("Jumpy v.0.3.0")
+pygame.display.set_caption("Jumpy v.0.3.1")
+
 
 # Define the player character class
 class Player(pygame.sprite.Sprite):
@@ -64,6 +65,7 @@ class Player(pygame.sprite.Sprite):
         # Make the player character jump
         self.change_y = -10
 
+
 # Define the enemy class
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
@@ -87,6 +89,7 @@ class Enemy(pygame.sprite.Sprite):
         if self.rect.bottom > 500 or self.rect.top < 0:
             self.change_y *= -1
 
+
 # Define the platform class
 class Platform(pygame.sprite.Sprite):
     def __init__(self, width, height):
@@ -94,6 +97,7 @@ class Platform(pygame.sprite.Sprite):
         self.image = pygame.Surface([width, height])
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
+
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):  # Fixed method name and added x, y arguments
@@ -121,9 +125,10 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
             score.add_points(10)
 
-        # Remove the bullet when it goes off screen
+        # Remove the bullet when it goes off-screen
         if self.rect.right < 0 or self.rect.left > 700 or self.rect.top > 500:
             self.kill()
+
 
 class Score:
     def __init__(self):
@@ -158,7 +163,6 @@ platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 
-
 for i in range(10):
     platform = Platform(70, 20)
     platform.rect.x = random.randint(0, 630)
@@ -182,6 +186,7 @@ done = False
 # Create a custom event for spawning enemies
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
 pygame.time.set_timer(SPAWN_ENEMY_EVENT, 15000)  # 15000 milliseconds = 15 seconds
+
 
 def main_menu(screen, clock):
     font = pygame.font.Font(None, 36)
@@ -208,6 +213,7 @@ def main_menu(screen, clock):
                     return False
         clock.tick(60)
 
+
 def pause_menu(screen, clock):
     font = pygame.font.Font(None, 36)
     text = font.render("Paused. Press 'P' to resume or 'Q' to quit.", True, WHITE)
@@ -230,6 +236,7 @@ def pause_menu(screen, clock):
                     return False
         clock.tick(60)
 
+
 # Function to display the "Game Over" message and handle restarting the game
 def game_over(screen, clock):
     font = pygame.font.Font(None, 36)
@@ -249,6 +256,7 @@ def game_over(screen, clock):
                 if event.key == pygame.K_f:
                     return True
         clock.tick(60)
+
 
 # Call the main menu before the game loop
 if not main_menu(screen, clock):
@@ -307,9 +315,6 @@ while not done:
     platforms.update()
     enemies.update()
     bullets.update()
-
-
-
 
     # Draw the screen
     screen.fill(BLACK)
