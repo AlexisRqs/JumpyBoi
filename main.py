@@ -194,11 +194,16 @@ def main_menu(screen, clock):
     start_text = font.render("Press 'S' to Start", True, WHITE)
     quit_text = font.render("Press 'Q' to Quit", True, WHITE)
 
+    high_scores = load_high_scores()
+
     while True:
         screen.fill(BLACK)
         screen.blit(title, (size[0] // 2 - title.get_width() // 2, size[1] // 3))
         screen.blit(start_text, (size[0] // 2 - start_text.get_width() // 2, size[1] // 2))
         screen.blit(quit_text, (size[0] // 2 - quit_text.get_width() // 2, size[1] // 2 + 50))
+
+        display_high_scores(screen, high_scores)
+
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -228,12 +233,10 @@ def pause_menu(screen, clock):
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    return True
-                elif event.key == pygame.K_q:
-                    pygame.quit()
-                    return False
+            # Pause the game
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+                if not pause_menu(screen, clock):
+                    done = True
         clock.tick(60)
 
 
@@ -256,6 +259,31 @@ def game_over(screen, clock):
                 if event.key == pygame.K_f:
                     return True
         clock.tick(60)
+
+
+def save_high_score(score):
+    with open("high_scores.txt", "a") as file:
+        file.write(str(score) + "\n")
+
+
+def load_high_scores():
+    try:
+        with open("high_scores.txt", "r") as file:
+            high_scores = [int(line.strip()) for line in file.readlines()]
+            high_scores.sort(reverse=True)
+            return high_scores
+    except FileNotFoundError:
+        return []
+
+
+def display_high_scores(screen, high_scores):
+    font = pygame.font.Font(None, 36)
+    title = font.render("High Scores:", True, WHITE)
+    screen.blit(title, (size[0] // 2 - title.get_width() // 2, 100))  # Changed Y-coordinate
+
+    for index, score in enumerate(high_scores[:5]):  # Show only the top 5 scores
+        score_text = font.render(f"{index + 1}. {score}", True, WHITE)
+        screen.blit(score_text, (size[0] // 2 - score_text.get_width() // 2, 150 + 40 * index))  # Changed Y-coordinate
 
 
 # Call the main menu before the game loop
@@ -298,6 +326,8 @@ while not done:
     # Check for collisions with enemies
     enemy_hit_list = pygame.sprite.spritecollide(player, enemies, False)
     if enemy_hit_list:
+        total_score = score.time_score + score.enemy_score
+        save_high_score(total_score)
         # The player character dies when it collides with an enemy
         if game_over(screen, clock):
             # Reset the game state (player, enemies, platforms, bullets, etc.)
