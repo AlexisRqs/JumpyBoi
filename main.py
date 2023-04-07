@@ -12,7 +12,7 @@ BLUE = (0, 0, 255)
 pygame.init()
 size = (700, 500)
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption("Jumpy v.0.2.0")
+pygame.display.set_caption("Jumpy v.0.3.0")
 
 # Define the player character class
 class Player(pygame.sprite.Sprite):
@@ -183,6 +183,53 @@ done = False
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
 pygame.time.set_timer(SPAWN_ENEMY_EVENT, 15000)  # 15000 milliseconds = 15 seconds
 
+def main_menu(screen, clock):
+    font = pygame.font.Font(None, 36)
+    title = font.render("Jumpy v.0.2.0", True, WHITE)
+    start_text = font.render("Press 'S' to Start", True, WHITE)
+    quit_text = font.render("Press 'Q' to Quit", True, WHITE)
+
+    while True:
+        screen.fill(BLACK)
+        screen.blit(title, (size[0] // 2 - title.get_width() // 2, size[1] // 3))
+        screen.blit(start_text, (size[0] // 2 - start_text.get_width() // 2, size[1] // 2))
+        screen.blit(quit_text, (size[0] // 2 - quit_text.get_width() // 2, size[1] // 2 + 50))
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    return True
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    return False
+        clock.tick(60)
+
+def pause_menu(screen, clock):
+    font = pygame.font.Font(None, 36)
+    text = font.render("Paused. Press 'P' to resume or 'Q' to quit.", True, WHITE)
+    text_rect = text.get_rect(center=(size[0] // 2, size[1] // 2))
+
+    while True:
+        screen.fill(BLACK)
+        screen.blit(text, text_rect)
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    return True
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    return False
+        clock.tick(60)
+
 # Function to display the "Game Over" message and handle restarting the game
 def game_over(screen, clock):
     font = pygame.font.Font(None, 36)
@@ -202,6 +249,10 @@ def game_over(screen, clock):
                 if event.key == pygame.K_f:
                     return True
         clock.tick(60)
+
+# Call the main menu before the game loop
+if not main_menu(screen, clock):
+    done = True
 
 while not done:
     # Handle events
@@ -230,6 +281,11 @@ while not done:
         elif event.type == pygame.KEYUP:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 player.change_x = 0
+        # Pause the game
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:
+                if not pause_menu(screen, clock):
+                    done = True
 
     # Check for collisions with enemies
     enemy_hit_list = pygame.sprite.spritecollide(player, enemies, False)
