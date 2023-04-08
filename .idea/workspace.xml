@@ -8,8 +8,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="47633095-2d86-4439-8972-9402b28e964f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/constants.py" afterDir="false" />
+    <list default="true" id="47633095-2d86-4439-8972-9402b28e964f" name="Changes" comment="Gotta be constant wih the versionning again">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/high_scores.txt" beforeDir="false" afterPath="$PROJECT_DIR$/high_scores.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
@@ -115,7 +114,28 @@
       <option name="project" value="LOCAL" />
       <updated>1680939454397</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Refactored code, moved constants in a separate files">
+      <created>1680942170485</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1680942170485</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Gotta be constant wih the versionning">
+      <created>1680942456389</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1680942456389</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Gotta be constant wih the versionning again">
+      <created>1680942504444</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1680942504444</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -128,9 +148,12 @@
     <MESSAGE value="Added a messy high score at start menu" />
     <MESSAGE value="Fixed pause menu, but now move controls are messy too" />
     <MESSAGE value="Updated pause menu, you can now restart, go back to main menu" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated pause menu, you can now restart, go back to main menu" />
+    <MESSAGE value="Refactored code, moved constants in a separate files" />
+    <MESSAGE value="Gotta be constant wih the versionning" />
+    <MESSAGE value="Gotta be constant wih the versionning again" />
+    <option name="LAST_COMMIT_MESSAGE" value="Gotta be constant wih the versionning again" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Jumpy$main.coverage" NAME="main Coverage Results" MODIFIED="1680941911645" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Jumpy$main.coverage" NAME="main Coverage Results" MODIFIED="1680942779652" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

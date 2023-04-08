@@ -221,13 +221,12 @@ def main_menu(screen, clock):
 def pause_menu(screen, clock):
     font = pygame.font.Font(None, 36)
     pause_text = font.render("Paused", True, WHITE)
-    resume_text = font.render("Press 'P' to resume", True, WHITE)
+    resume_text = font.render("Press 'Esc' to resume", True, WHITE)
     restart_text = font.render("Press 'R' to restart", True, WHITE)
     start_menu_text = font.render("Press 'M' to return to start menu", True, WHITE)
     quit_text = font.render("Press 'Q' to quit", True, WHITE)
 
     while True:
-        screen.fill(BLACK)
         screen.blit(pause_text, (SCREEN_SIZE[0] // 2 - pause_text.get_width() // 2, SCREEN_SIZE[1] // 3))
         screen.blit(resume_text, (SCREEN_SIZE[0] // 2 - resume_text.get_width() // 2, SCREEN_SIZE[1] // 2))
         screen.blit(restart_text, (SCREEN_SIZE[0] // 2 - restart_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 50))
@@ -240,7 +239,7 @@ def pause_menu(screen, clock):
                 pygame.quit()
                 return "quit"
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
+                if event.key == pygame.K_ESCAPE:
                     return "resume"
                 elif event.key == pygame.K_r:
                     return "restart"
@@ -312,7 +311,7 @@ while not done:
             enemy = Enemy()
             enemies.add(enemy)
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:
+            if event.key == pygame.K_ESCAPE:
                 pause_result = pause_menu(screen, clock)
                 if pause_result == "quit":
                     done = True
