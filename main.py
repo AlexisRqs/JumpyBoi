@@ -17,6 +17,7 @@ pygame.display.set_caption("Jumpy v.0.3.1")
 
 # Define the player character class
 class Player(pygame.sprite.Sprite):
+
     def __init__(self):
         super().__init__()
         self.image = pygame.Surface([30, 50])
@@ -126,7 +127,7 @@ class Bullet(pygame.sprite.Sprite):
             score.add_points(10)
 
         # Remove the bullet when it goes off-screen
-        if self.rect.right < 0 or self.rect.left > 700 or self.rect.top > 500:
+        if self.rect.right < 0 or self.rect.left > 700 or self.rect.top > 500 or self.rect.bottom < 0:
             self.kill()
 
 
@@ -185,12 +186,12 @@ done = False
 
 # Create a custom event for spawning enemies
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
-pygame.time.set_timer(SPAWN_ENEMY_EVENT, 15000)  # 15000 milliseconds = 15 seconds
+pygame.time.set_timer(SPAWN_ENEMY_EVENT, 10000)  # 10000 milliseconds = 10 seconds
 
 
 def main_menu(screen, clock):
     font = pygame.font.Font(None, 36)
-    title = font.render("Jumpy v.0.2.0", True, WHITE)
+    title = font.render("Jumpy v.0.3.1", True, WHITE)
     start_text = font.render("Press 'S' to Start", True, WHITE)
     quit_text = font.render("Press 'Q' to Quit", True, WHITE)
 
@@ -221,24 +222,35 @@ def main_menu(screen, clock):
 
 def pause_menu(screen, clock):
     font = pygame.font.Font(None, 36)
-    text = font.render("Paused. Press 'P' to resume or 'Q' to quit.", True, WHITE)
-    text_rect = text.get_rect(center=(size[0] // 2, size[1] // 2))
+    pause_text = font.render("Paused", True, WHITE)
+    resume_text = font.render("Press 'P' to resume", True, WHITE)
+    restart_text = font.render("Press 'R' to restart", True, WHITE)
+    start_menu_text = font.render("Press 'M' to return to start menu", True, WHITE)
+    quit_text = font.render("Press 'Q' to quit", True, WHITE)
 
     while True:
         screen.fill(BLACK)
-        screen.blit(text, text_rect)
+        screen.blit(pause_text, (size[0] // 2 - pause_text.get_width() // 2, size[1] // 3))
+        screen.blit(resume_text, (size[0] // 2 - resume_text.get_width() // 2, size[1] // 2))
+        screen.blit(restart_text, (size[0] // 2 - restart_text.get_width() // 2, size[1] // 2 + 50))
+        screen.blit(start_menu_text, (size[0] // 2 - start_menu_text.get_width() // 2, size[1] // 2 + 100))
+        screen.blit(quit_text, (size[0] // 2 - quit_text.get_width() // 2, size[1] // 2 + 150))
         pygame.display.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                return False
+                return "quit"
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
-                    return True
+                    return "resume"
+                elif event.key == pygame.K_r:
+                    return "restart"
+                elif event.key == pygame.K_m:
+                    return "main_menu"
                 elif event.key == pygame.K_q:
                     pygame.quit()
-                    return False
+                    return "quit"
         clock.tick(60)
 
 
@@ -286,7 +298,7 @@ def display_high_scores(screen, high_scores):
 
     for index, score in enumerate(high_scores[:5]):  # Show only the top 5 scores
         score_text = font.render(f"{index + 1}. {score}", True, WHITE)
-        screen.blit(score_text, (size[0] // 2 - score_text.get_width() // 2, 150 + 40 * index))  # Changed Y-coordinate
+        screen.blit(score_text, (size[0] // 2 - score_text.get_width() // 2, 150 + 30 * index))  # Changed Y-coordinate
 
 
 # Call the main menu before the game loop
@@ -303,9 +315,32 @@ while not done:
             enemies.add(enemy)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:
-                if not pause_menu(screen, clock):
+                pause_result = pause_menu(screen, clock)
+                if pause_result == "quit":
                     done = True
                     break
+                elif pause_result == "restart":
+                    player = Player()
+                    bullets.empty()
+                    enemies.empty()
+                    score.reset()
+                    for i in range(5):
+                        enemy = Enemy()
+                        enemies.add(enemy)
+                    break
+                elif pause_result == "main_menu":
+                    player = Player()
+                    bullets.empty()
+                    enemies.empty()
+                    score.reset()
+                    main_menu_result = main_menu(screen, clock)
+                    if main_menu_result == "main":
+                        for i in range(5):
+                            enemy = Enemy()
+                            enemies.add(enemy)
+                    elif main_menu_result == "quit":
+                        done = True
+                        break
             elif event.key == pygame.K_LEFT:
                 player.change_x = -5
             elif event.key == pygame.K_RIGHT:
@@ -331,6 +366,7 @@ while not done:
         if game_over(screen, clock):
             # Reset the game state (player, enemies, platforms, bullets, etc.)
             player = Player()
+            bullets.empty()
             enemies.empty()
             score.reset()
             for i in range(5):
