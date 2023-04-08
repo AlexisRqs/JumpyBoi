@@ -1,18 +1,11 @@
 import pygame
 import random
-
-# Define some colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
+from constants import *
 
 # Set up the game window
 pygame.init()
-size = (700, 500)
-screen = pygame.display.set_mode(size)
-pygame.display.set_caption("Jumpy v.0.3.1")
+screen = pygame.display.set_mode(SCREEN_SIZE)
+pygame.display.set_caption(CAPTION)
 
 
 # Define the player character class
@@ -146,7 +139,7 @@ class Score:
 
         total_score = self.time_score + self.enemy_score
         score_text = self.font.render(f"Score: {total_score}", True, WHITE)
-        screen.blit(score_text, (size[0] - 200, 10))
+        screen.blit(score_text, (SCREEN_SIZE[0] - 200, 10))
 
     def add_points(self, points):
         self.enemy_score += points
@@ -164,22 +157,27 @@ platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 
-for i in range(10):
-    platform = Platform(70, 20)
-    platform.rect.x = random.randint(0, 630)
-    platform.rect.y = random.randint(50, 450)
-    platforms.add(platform)
+def create_platforms(n):
+    for _ in range(n):
+        platform = Platform(70, 20)
+        platform.rect.x = random.randint(0, 630)
+        platform.rect.y = random.randint(50, 450)
+        platforms.add(platform)
 
-for i in range(5):
-    enemy = Enemy()
-    enemies.add(enemy)
+def create_enemies(n):
+    for _ in range(n):
+        enemy = Enemy()
+        enemies.add(enemy)
+
+# Create platforms and enemies
+create_platforms(10)
+create_enemies(5)
 
 # Add a platform at the bottom of the screen
 bottom_platform = Platform(700, 20)
 bottom_platform.rect.x = 0
 bottom_platform.rect.y = 480
 platforms.add(bottom_platform)
-
 # Set up the game loop
 clock = pygame.time.Clock()
 done = False
@@ -199,9 +197,9 @@ def main_menu(screen, clock):
 
     while True:
         screen.fill(BLACK)
-        screen.blit(title, (size[0] // 2 - title.get_width() // 2, size[1] // 3))
-        screen.blit(start_text, (size[0] // 2 - start_text.get_width() // 2, size[1] // 2))
-        screen.blit(quit_text, (size[0] // 2 - quit_text.get_width() // 2, size[1] // 2 + 50))
+        screen.blit(title, (SCREEN_SIZE[0] // 2 - title.get_width() // 2, SCREEN_SIZE[1] // 3))
+        screen.blit(start_text, (SCREEN_SIZE[0] // 2 - start_text.get_width() // 2, SCREEN_SIZE[1] // 2))
+        screen.blit(quit_text, (SCREEN_SIZE[0] // 2 - quit_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 50))
 
         display_high_scores(screen, high_scores)
 
@@ -230,11 +228,11 @@ def pause_menu(screen, clock):
 
     while True:
         screen.fill(BLACK)
-        screen.blit(pause_text, (size[0] // 2 - pause_text.get_width() // 2, size[1] // 3))
-        screen.blit(resume_text, (size[0] // 2 - resume_text.get_width() // 2, size[1] // 2))
-        screen.blit(restart_text, (size[0] // 2 - restart_text.get_width() // 2, size[1] // 2 + 50))
-        screen.blit(start_menu_text, (size[0] // 2 - start_menu_text.get_width() // 2, size[1] // 2 + 100))
-        screen.blit(quit_text, (size[0] // 2 - quit_text.get_width() // 2, size[1] // 2 + 150))
+        screen.blit(pause_text, (SCREEN_SIZE[0] // 2 - pause_text.get_width() // 2, SCREEN_SIZE[1] // 3))
+        screen.blit(resume_text, (SCREEN_SIZE[0] // 2 - resume_text.get_width() // 2, SCREEN_SIZE[1] // 2))
+        screen.blit(restart_text, (SCREEN_SIZE[0] // 2 - restart_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 50))
+        screen.blit(start_menu_text, (SCREEN_SIZE[0] // 2 - start_menu_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 100))
+        screen.blit(quit_text, (SCREEN_SIZE[0] // 2 - quit_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 150))
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -259,7 +257,7 @@ def pause_menu(screen, clock):
 def game_over(screen, clock):
     font = pygame.font.Font(None, 36)
     text = font.render("Game Over! Press 'F' to play again.", True, WHITE)
-    text_rect = text.get_rect(center=(size[0] // 2, size[1] // 2))
+    text_rect = text.get_rect(center=(SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2))
 
     while True:
         screen.fill(BLACK)
@@ -294,11 +292,11 @@ def load_high_scores():
 def display_high_scores(screen, high_scores):
     font = pygame.font.Font(None, 36)
     title = font.render("High Scores:", True, WHITE)
-    screen.blit(title, (size[0] // 2 - title.get_width() // 2, 100))  # Changed Y-coordinate
+    screen.blit(title, (SCREEN_SIZE[0] // 2 - title.get_width() // 2, 100))  # Changed Y-coordinate
 
     for index, score in enumerate(high_scores[:5]):  # Show only the top 5 scores
         score_text = font.render(f"{index + 1}. {score}", True, WHITE)
-        screen.blit(score_text, (size[0] // 2 - score_text.get_width() // 2, 150 + 30 * index))  # Changed Y-coordinate
+        screen.blit(score_text, (SCREEN_SIZE[0] // 2 - score_text.get_width() // 2, 150 + 30 * index))  # Changed Y-coordinate
 
 
 # Call the main menu before the game loop
