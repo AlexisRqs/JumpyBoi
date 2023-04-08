@@ -1,154 +1,19 @@
 import pygame
 import random
+from bullet import *
+import pygame
+import random
 from constants import *
+from player import Player
+from enemy import Enemy
+from platform import Platform
+from bullet import Bullet
+from score import Score
 
 # Set up the game window
 pygame.init()
 screen = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(CAPTION)
-
-
-# Define the player character class
-class Player(pygame.sprite.Sprite):
-
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface([30, 50])
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
-        self.rect.x = 100
-        self.rect.y = 400
-        self.change_x = 0
-        self.change_y = 0
-
-    def update(self):
-        # Apply gravity
-        self.change_y += 0.5
-
-        # Move horizontally
-        self.rect.x += self.change_x
-
-        # Check for collisions with platforms
-        platform_hit_list = pygame.sprite.spritecollide(self, platforms, False)
-        for platform in platform_hit_list:
-            if self.change_x > 0:
-                self.rect.right = platform.rect.left
-            elif self.change_x < 0:
-                self.rect.left = platform.rect.right
-
-        # Move vertically
-        self.rect.y += self.change_y
-
-        # Check for collisions with platforms
-        platform_hit_list = pygame.sprite.spritecollide(self, platforms, False)
-        for platform in platform_hit_list:
-            if self.change_y > 0:
-                self.rect.bottom = platform.rect.top
-                self.change_y = 0
-            elif self.change_y < 0:
-                self.rect.top = platform.rect.bottom
-                self.change_y = 0
-
-        # Check for collisions with enemies
-        enemy_hit_list = pygame.sprite.spritecollide(self, enemies, False)
-        if enemy_hit_list:
-            # The player character dies when it collides with an enemy
-            self.kill()
-
-    def jump(self):
-        # Make the player character jump
-        self.change_y = -10
-
-
-# Define the enemy class
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface([30, 30])
-        self.image.fill(BLUE)
-        self.rect = self.image.get_rect()
-        self.rect.x = random.randint(0, 670)
-        self.rect.y = random.randint(0, 470)
-        self.change_x = random.choice([-2, -1, 1, 2])
-        self.change_y = random.choice([-2, -1, 1, 2])
-
-    def update(self):
-        # Move the enemy
-        self.rect.x += self.change_x
-        self.rect.y += self.change_y
-
-        # Reverse direction if the enemy hits a wall
-        if self.rect.right > 700 or self.rect.left < 0:
-            self.change_x *= -1
-        if self.rect.bottom > 500 or self.rect.top < 0:
-            self.change_y *= -1
-
-
-# Define the platform class
-class Platform(pygame.sprite.Sprite):
-    def __init__(self, width, height):
-        super().__init__()
-        self.image = pygame.Surface([width, height])
-        self.image.fill(GREEN)
-        self.rect = self.image.get_rect()
-
-
-class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction):  # Fixed method name and added x, y arguments
-        super().__init__()
-        self.image = pygame.Surface([5, 5])
-        self.image.fill(WHITE)
-        self.rect = self.image.get_rect()
-        self.rect.x = x  # Set the bullet's initial position
-        self.rect.y = y  # Set the bullet's initial position
-        self.speed = 10
-        self.direction = direction
-
-    def update(self):
-        if self.direction == "left":
-            self.rect.x -= self.speed
-        elif self.direction == "right":
-            self.rect.x += self.speed
-        elif self.direction == "up":
-            self.rect.y -= self.speed
-
-        # Check for collisions with enemies
-        enemy_hit_list = pygame.sprite.spritecollide(self, enemies, True)
-        for enemy in enemy_hit_list:
-            # Remove the bullet when it hits an enemy
-            self.kill()
-            score.add_points(10)
-
-        # Remove the bullet when it goes off-screen
-        if self.rect.right < 0 or self.rect.left > 700 or self.rect.top > 500 or self.rect.bottom < 0:
-            self.kill()
-
-
-class Score:
-    def __init__(self):
-        self.time_score = 0
-        self.enemy_score = 0
-        self.font = pygame.font.Font(None, 36)
-        self.last_update = pygame.time.get_ticks()
-
-    def update(self, screen):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_update >= 1000:  # Increment score every 1 second
-            self.time_score += 1
-            self.last_update = current_time
-
-        total_score = self.time_score + self.enemy_score
-        score_text = self.font.render(f"Score: {total_score}", True, WHITE)
-        screen.blit(score_text, (SCREEN_SIZE[0] - 200, 10))
-
-    def add_points(self, points):
-        self.enemy_score += points
-
-    def reset(self):
-        self.time_score = 0
-        self.enemy_score = 0
-        self.last_update = pygame.time.get_ticks()
-
 
 # Create the player character, platform, and enemy sprites + bullets
 score = Score()
@@ -157,6 +22,7 @@ platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 
+
 def create_platforms(n):
     for _ in range(n):
         platform = Platform(70, 20)
@@ -164,10 +30,12 @@ def create_platforms(n):
         platform.rect.y = random.randint(50, 450)
         platforms.add(platform)
 
+
 def create_enemies(n):
     for _ in range(n):
         enemy = Enemy()
         enemies.add(enemy)
+
 
 # Create platforms and enemies
 create_platforms(10)
@@ -190,16 +58,16 @@ pygame.time.set_timer(SPAWN_ENEMY_EVENT, 10000)  # 10000 milliseconds = 10 secon
 def main_menu(screen, clock):
     font = pygame.font.Font(None, 36)
     title = font.render(CAPTION, True, WHITE)
-    start_text = font.render("Press 'S' to Start", True, WHITE)
-    quit_text = font.render("Press 'Q' to Quit", True, WHITE)
+    start_text = font.render("[SPACEBAR] Start", True, WHITE)
+    quit_text = font.render("[Q] Quit", True, WHITE)
 
     high_scores = load_high_scores()
 
     while True:
         screen.fill(BLACK)
-        screen.blit(title, (SCREEN_SIZE[0] // 2 - title.get_width() // 2, SCREEN_SIZE[1] // 3))
-        screen.blit(start_text, (SCREEN_SIZE[0] // 2 - start_text.get_width() // 2, SCREEN_SIZE[1] // 2))
-        screen.blit(quit_text, (SCREEN_SIZE[0] // 2 - quit_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 50))
+        screen.blit(title, (SCREEN_SIZE[0] // 2 - title.get_width() // 2, SCREEN_SIZE[1] // 10))
+        screen.blit(start_text, (SCREEN_SIZE[0] // 2 - start_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 70))
+        screen.blit(quit_text, (SCREEN_SIZE[0] // 2 - quit_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 110))
 
         display_high_scores(screen, high_scores)
 
@@ -210,7 +78,7 @@ def main_menu(screen, clock):
                 pygame.quit()
                 return False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_s:
+                if event.key == pygame.K_SPACE:
                     return True
                 elif event.key == pygame.K_q:
                     pygame.quit()
@@ -221,10 +89,10 @@ def main_menu(screen, clock):
 def pause_menu(screen, clock):
     font = pygame.font.Font(None, 36)
     pause_text = font.render("Paused", True, WHITE)
-    resume_text = font.render("Press 'Esc' to resume", True, WHITE)
-    restart_text = font.render("Press 'R' to restart", True, WHITE)
-    start_menu_text = font.render("Press 'M' to return to start menu", True, WHITE)
-    quit_text = font.render("Press 'Q' to quit", True, WHITE)
+    resume_text = font.render("[Esc] Close", True, WHITE)
+    restart_text = font.render("[R] Restart", True, WHITE)
+    start_menu_text = font.render("[M] Menu", True, WHITE)
+    quit_text = font.render("[Q] Quit game", True, WHITE)
 
     while True:
         screen.blit(pause_text, (SCREEN_SIZE[0] // 2 - pause_text.get_width() // 2, SCREEN_SIZE[1] // 3))
@@ -249,7 +117,6 @@ def pause_menu(screen, clock):
                     pygame.quit()
                     return "quit"
         clock.tick(60)
-
 
 
 # Function to display the "Game Over" message and handle restarting the game
@@ -295,7 +162,8 @@ def display_high_scores(screen, high_scores):
 
     for index, score in enumerate(high_scores[:5]):  # Show only the top 5 scores
         score_text = font.render(f"{index + 1}. {score}", True, WHITE)
-        screen.blit(score_text, (SCREEN_SIZE[0] // 2 - score_text.get_width() // 2, 150 + 30 * index))  # Changed Y-coordinate
+        screen.blit(score_text,
+                    (SCREEN_SIZE[0] // 2 - score_text.get_width() // 2, 150 + 30 * index))  # Changed Y-coordinate
 
 
 # Call the main menu before the game loop
@@ -373,10 +241,10 @@ while not done:
             done = True
 
     # Update the player character, platforms, enemies, and bullets
-    player.update()
+    player.update(platforms, enemies)
     platforms.update()
     enemies.update()
-    bullets.update()
+    bullets.update(enemies, score)
 
     # Draw the screen
     screen.fill(BLACK)
