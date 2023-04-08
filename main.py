@@ -1,154 +1,19 @@
 import pygame
 import random
+from bullet import *
+import pygame
+import random
 from constants import *
+from player import Player
+from enemy import Enemy
+from platform import Platform
+from bullet import Bullet
+from score import Score
 
 # Set up the game window
 pygame.init()
 screen = pygame.display.set_mode(SCREEN_SIZE)
 pygame.display.set_caption(CAPTION)
-
-
-# Define the player character class
-class Player(pygame.sprite.Sprite):
-
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface([30, 50])
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
-        self.rect.x = 100
-        self.rect.y = 400
-        self.change_x = 0
-        self.change_y = 0
-
-    def update(self):
-        # Apply gravity
-        self.change_y += 0.5
-
-        # Move horizontally
-        self.rect.x += self.change_x
-
-        # Check for collisions with platforms
-        platform_hit_list = pygame.sprite.spritecollide(self, platforms, False)
-        for platform in platform_hit_list:
-            if self.change_x > 0:
-                self.rect.right = platform.rect.left
-            elif self.change_x < 0:
-                self.rect.left = platform.rect.right
-
-        # Move vertically
-        self.rect.y += self.change_y
-
-        # Check for collisions with platforms
-        platform_hit_list = pygame.sprite.spritecollide(self, platforms, False)
-        for platform in platform_hit_list:
-            if self.change_y > 0:
-                self.rect.bottom = platform.rect.top
-                self.change_y = 0
-            elif self.change_y < 0:
-                self.rect.top = platform.rect.bottom
-                self.change_y = 0
-
-        # Check for collisions with enemies
-        enemy_hit_list = pygame.sprite.spritecollide(self, enemies, False)
-        if enemy_hit_list:
-            # The player character dies when it collides with an enemy
-            self.kill()
-
-    def jump(self):
-        # Make the player character jump
-        self.change_y = -10
-
-
-# Define the enemy class
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface([30, 30])
-        self.image.fill(BLUE)
-        self.rect = self.image.get_rect()
-        self.rect.x = random.randint(0, 670)
-        self.rect.y = random.randint(0, 470)
-        self.change_x = random.choice([-2, -1, 1, 2])
-        self.change_y = random.choice([-2, -1, 1, 2])
-
-    def update(self):
-        # Move the enemy
-        self.rect.x += self.change_x
-        self.rect.y += self.change_y
-
-        # Reverse direction if the enemy hits a wall
-        if self.rect.right > 700 or self.rect.left < 0:
-            self.change_x *= -1
-        if self.rect.bottom > 500 or self.rect.top < 0:
-            self.change_y *= -1
-
-
-# Define the platform class
-class Platform(pygame.sprite.Sprite):
-    def __init__(self, width, height):
-        super().__init__()
-        self.image = pygame.Surface([width, height])
-        self.image.fill(GREEN)
-        self.rect = self.image.get_rect()
-
-
-class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction):  # Fixed method name and added x, y arguments
-        super().__init__()
-        self.image = pygame.Surface([5, 5])
-        self.image.fill(WHITE)
-        self.rect = self.image.get_rect()
-        self.rect.x = x  # Set the bullet's initial position
-        self.rect.y = y  # Set the bullet's initial position
-        self.speed = 10
-        self.direction = direction
-
-    def update(self):
-        if self.direction == "left":
-            self.rect.x -= self.speed
-        elif self.direction == "right":
-            self.rect.x += self.speed
-        elif self.direction == "up":
-            self.rect.y -= self.speed
-
-        # Check for collisions with enemies
-        enemy_hit_list = pygame.sprite.spritecollide(self, enemies, True)
-        for enemy in enemy_hit_list:
-            # Remove the bullet when it hits an enemy
-            self.kill()
-            score.add_points(10)
-
-        # Remove the bullet when it goes off-screen
-        if self.rect.right < 0 or self.rect.left > 700 or self.rect.top > 500 or self.rect.bottom < 0:
-            self.kill()
-
-
-class Score:
-    def __init__(self):
-        self.time_score = 0
-        self.enemy_score = 0
-        self.font = pygame.font.Font(None, 36)
-        self.last_update = pygame.time.get_ticks()
-
-    def update(self, screen):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_update >= 1000:  # Increment score every 1 second
-            self.time_score += 1
-            self.last_update = current_time
-
-        total_score = self.time_score + self.enemy_score
-        score_text = self.font.render(f"Score: {total_score}", True, WHITE)
-        screen.blit(score_text, (SCREEN_SIZE[0] - 200, 10))
-
-    def add_points(self, points):
-        self.enemy_score += points
-
-    def reset(self):
-        self.time_score = 0
-        self.enemy_score = 0
-        self.last_update = pygame.time.get_ticks()
-
 
 # Create the player character, platform, and enemy sprites + bullets
 score = Score()
@@ -373,10 +238,10 @@ while not done:
             done = True
 
     # Update the player character, platforms, enemies, and bullets
-    player.update()
+    player.update(platforms, enemies)
     platforms.update()
     enemies.update()
-    bullets.update()
+    bullets.update(enemies, score)
 
     # Draw the screen
     screen.fill(BLACK)
