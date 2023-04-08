@@ -122,12 +122,18 @@ def pause_menu(screen, clock):
 # Function to display the "Game Over" message and handle restarting the game
 def game_over(screen, clock):
     font = pygame.font.Font(None, 36)
-    text = font.render("Game Over! Press 'F' to play again.", True, WHITE)
-    text_rect = text.get_rect(center=(SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2))
+    text = font.render("Game Over", True, WHITE)
+    restart_text = font.render("[SPACEBAR] Restart", True, WHITE)
+    start_menu_text = font.render("[M] Menu", True, WHITE)
+    quit_text = font.render("[Q] Quit game", True, WHITE)
+    text_rect = text.get_rect(center=(SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 3))
 
     while True:
         screen.fill(BLACK)
         screen.blit(text, text_rect)
+        screen.blit(restart_text, (SCREEN_SIZE[0] // 2 - restart_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 50))
+        screen.blit(start_menu_text, (SCREEN_SIZE[0] // 2 - start_menu_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 100))
+        screen.blit(quit_text, (SCREEN_SIZE[0] // 2 - quit_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 150))
         pygame.display.flip()
 
         for event in pygame.event.get():
@@ -137,6 +143,13 @@ def game_over(screen, clock):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
                     return True
+                elif event.key == pygame.K_SPACE:
+                    return "restart"
+                elif event.key == pygame.K_m:
+                    return "main_menu"
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    return "quit"
         clock.tick(60)
 
 
@@ -228,7 +241,8 @@ while not done:
         total_score = score.time_score + score.enemy_score
         save_high_score(total_score)
         # The player character dies when it collides with an enemy
-        if game_over(screen, clock):
+        game_over_result = game_over(screen, clock)
+        if game_over_result == "restart" or game_over_result == True:
             # Reset the game state (player, enemies, platforms, bullets, etc.)
             player = Player()
             bullets.empty()
@@ -237,7 +251,19 @@ while not done:
             for i in range(5):
                 enemy = Enemy()
                 enemies.add(enemy)
-        else:
+        elif game_over_result == "main_menu":
+            player = Player()
+            bullets.empty()
+            enemies.empty()
+            score.reset()
+            main_menu_result = main_menu(screen, clock)
+            if main_menu_result:
+                for i in range(5):
+                    enemy = Enemy()
+                    enemies.add(enemy)
+            else:
+                done = True
+        elif game_over_result == "quit":
             done = True
 
     # Update the player character, platforms, enemies, and bullets
