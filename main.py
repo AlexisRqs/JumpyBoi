@@ -122,11 +122,11 @@ def pause_menu(screen, clock):
 # Function to display the "Game Over" message and handle restarting the game
 def game_over(screen, clock):
     font = pygame.font.Font(None, 36)
-    text = font.render("Game Over! Press 'F' to play again.", True, WHITE)
-    restart_text = font.render("[R] Restart", True, WHITE)
+    text = font.render("Game Over", True, WHITE)
+    restart_text = font.render("[SPACEBAR] Restart", True, WHITE)
     start_menu_text = font.render("[M] Menu", True, WHITE)
     quit_text = font.render("[Q] Quit game", True, WHITE)
-    text_rect = text.get_rect(center=(SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 2))
+    text_rect = text.get_rect(center=(SCREEN_SIZE[0] // 2, SCREEN_SIZE[1] // 3))
 
     while True:
         screen.fill(BLACK)
@@ -143,7 +143,7 @@ def game_over(screen, clock):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
                     return True
-                elif event.key == pygame.K_r:
+                elif event.key == pygame.K_SPACE:
                     return "restart"
                 elif event.key == pygame.K_m:
                     return "main_menu"
