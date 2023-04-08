@@ -22,6 +22,7 @@ platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
 
+
 def create_platforms(n):
     for _ in range(n):
         platform = Platform(70, 20)
@@ -29,10 +30,12 @@ def create_platforms(n):
         platform.rect.y = random.randint(50, 450)
         platforms.add(platform)
 
+
 def create_enemies(n):
     for _ in range(n):
         enemy = Enemy()
         enemies.add(enemy)
+
 
 # Create platforms and enemies
 create_platforms(10)
@@ -55,16 +58,16 @@ pygame.time.set_timer(SPAWN_ENEMY_EVENT, 10000)  # 10000 milliseconds = 10 secon
 def main_menu(screen, clock):
     font = pygame.font.Font(None, 36)
     title = font.render(CAPTION, True, WHITE)
-    start_text = font.render("Press 'S' to Start", True, WHITE)
-    quit_text = font.render("Press 'Q' to Quit", True, WHITE)
+    start_text = font.render("[SPACEBAR] Start", True, WHITE)
+    quit_text = font.render("[Q] Quit", True, WHITE)
 
     high_scores = load_high_scores()
 
     while True:
         screen.fill(BLACK)
-        screen.blit(title, (SCREEN_SIZE[0] // 2 - title.get_width() // 2, SCREEN_SIZE[1] // 3))
-        screen.blit(start_text, (SCREEN_SIZE[0] // 2 - start_text.get_width() // 2, SCREEN_SIZE[1] // 2))
-        screen.blit(quit_text, (SCREEN_SIZE[0] // 2 - quit_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 50))
+        screen.blit(title, (SCREEN_SIZE[0] // 2 - title.get_width() // 2, SCREEN_SIZE[1] // 10))
+        screen.blit(start_text, (SCREEN_SIZE[0] // 2 - start_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 70))
+        screen.blit(quit_text, (SCREEN_SIZE[0] // 2 - quit_text.get_width() // 2, SCREEN_SIZE[1] // 2 + 110))
 
         display_high_scores(screen, high_scores)
 
@@ -75,7 +78,7 @@ def main_menu(screen, clock):
                 pygame.quit()
                 return False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_s:
+                if event.key == pygame.K_SPACE:
                     return True
                 elif event.key == pygame.K_q:
                     pygame.quit()
@@ -86,10 +89,10 @@ def main_menu(screen, clock):
 def pause_menu(screen, clock):
     font = pygame.font.Font(None, 36)
     pause_text = font.render("Paused", True, WHITE)
-    resume_text = font.render("Press 'Esc' to resume", True, WHITE)
-    restart_text = font.render("Press 'R' to restart", True, WHITE)
-    start_menu_text = font.render("Press 'M' to return to start menu", True, WHITE)
-    quit_text = font.render("Press 'Q' to quit", True, WHITE)
+    resume_text = font.render("[Esc] Close", True, WHITE)
+    restart_text = font.render("[R] Restart", True, WHITE)
+    start_menu_text = font.render("[M] Menu", True, WHITE)
+    quit_text = font.render("[Q] Quit game", True, WHITE)
 
     while True:
         screen.blit(pause_text, (SCREEN_SIZE[0] // 2 - pause_text.get_width() // 2, SCREEN_SIZE[1] // 3))
@@ -114,7 +117,6 @@ def pause_menu(screen, clock):
                     pygame.quit()
                     return "quit"
         clock.tick(60)
-
 
 
 # Function to display the "Game Over" message and handle restarting the game
@@ -160,7 +162,8 @@ def display_high_scores(screen, high_scores):
 
     for index, score in enumerate(high_scores[:5]):  # Show only the top 5 scores
         score_text = font.render(f"{index + 1}. {score}", True, WHITE)
-        screen.blit(score_text, (SCREEN_SIZE[0] // 2 - score_text.get_width() // 2, 150 + 30 * index))  # Changed Y-coordinate
+        screen.blit(score_text,
+                    (SCREEN_SIZE[0] // 2 - score_text.get_width() // 2, 150 + 30 * index))  # Changed Y-coordinate
 
 
 # Call the main menu before the game loop
