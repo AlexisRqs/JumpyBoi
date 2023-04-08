@@ -12,10 +12,12 @@ BLUE = (0, 0, 255)
 pygame.init()
 size = (700, 500)
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption("Jumpy v.0.2.0")
+pygame.display.set_caption("Jumpy v.0.3.1")
+
 
 # Define the player character class
 class Player(pygame.sprite.Sprite):
+
     def __init__(self):
         super().__init__()
         self.image = pygame.Surface([30, 50])
@@ -64,6 +66,7 @@ class Player(pygame.sprite.Sprite):
         # Make the player character jump
         self.change_y = -10
 
+
 # Define the enemy class
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
@@ -87,6 +90,7 @@ class Enemy(pygame.sprite.Sprite):
         if self.rect.bottom > 500 or self.rect.top < 0:
             self.change_y *= -1
 
+
 # Define the platform class
 class Platform(pygame.sprite.Sprite):
     def __init__(self, width, height):
@@ -94,6 +98,7 @@ class Platform(pygame.sprite.Sprite):
         self.image = pygame.Surface([width, height])
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
+
 
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):  # Fixed method name and added x, y arguments
@@ -119,35 +124,45 @@ class Bullet(pygame.sprite.Sprite):
         for enemy in enemy_hit_list:
             # Remove the bullet when it hits an enemy
             self.kill()
+            score.add_points(10)
 
-        # Remove the bullet when it goes off screen
-        if self.rect.right < 0 or self.rect.left > 700 or self.rect.top > 500:
+        # Remove the bullet when it goes off-screen
+        if self.rect.right < 0 or self.rect.left > 700 or self.rect.top > 500 or self.rect.bottom < 0:
             self.kill()
+
 
 class Score:
     def __init__(self):
-        self.score = 0
+        self.time_score = 0
+        self.enemy_score = 0
         self.font = pygame.font.Font(None, 36)
         self.last_update = pygame.time.get_ticks()
 
     def update(self, screen):
         current_time = pygame.time.get_ticks()
         if current_time - self.last_update >= 1000:  # Increment score every 1 second
-            self.score += 1
+            self.time_score += 1
             self.last_update = current_time
 
-        score_text = self.font.render(f"Score: {self.score}", True, WHITE)
+        total_score = self.time_score + self.enemy_score
+        score_text = self.font.render(f"Score: {total_score}", True, WHITE)
         screen.blit(score_text, (size[0] - 200, 10))
 
     def add_points(self, points):
-        self.score += points
+        self.enemy_score += points
+
+    def reset(self):
+        self.time_score = 0
+        self.enemy_score = 0
+        self.last_update = pygame.time.get_ticks()
+
 
 # Create the player character, platform, and enemy sprites + bullets
+score = Score()
 player = Player()
 platforms = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
-score = Score()
 
 for i in range(10):
     platform = Platform(70, 20)
@@ -171,7 +186,74 @@ done = False
 
 # Create a custom event for spawning enemies
 SPAWN_ENEMY_EVENT = pygame.USEREVENT + 1
-pygame.time.set_timer(SPAWN_ENEMY_EVENT, 15000)  # 15000 milliseconds = 15 seconds
+pygame.time.set_timer(SPAWN_ENEMY_EVENT, 10000)  # 10000 milliseconds = 10 seconds
+
+
+def main_menu(screen, clock):
+    font = pygame.font.Font(None, 36)
+    title = font.render("Jumpy v.0.3.1", True, WHITE)
+    start_text = font.render("Press 'S' to Start", True, WHITE)
+    quit_text = font.render("Press 'Q' to Quit", True, WHITE)
+
+    high_scores = load_high_scores()
+
+    while True:
+        screen.fill(BLACK)
+        screen.blit(title, (size[0] // 2 - title.get_width() // 2, size[1] // 3))
+        screen.blit(start_text, (size[0] // 2 - start_text.get_width() // 2, size[1] // 2))
+        screen.blit(quit_text, (size[0] // 2 - quit_text.get_width() // 2, size[1] // 2 + 50))
+
+        display_high_scores(screen, high_scores)
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    return True
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    return False
+        clock.tick(60)
+
+
+def pause_menu(screen, clock):
+    font = pygame.font.Font(None, 36)
+    pause_text = font.render("Paused", True, WHITE)
+    resume_text = font.render("Press 'P' to resume", True, WHITE)
+    restart_text = font.render("Press 'R' to restart", True, WHITE)
+    start_menu_text = font.render("Press 'M' to return to start menu", True, WHITE)
+    quit_text = font.render("Press 'Q' to quit", True, WHITE)
+
+    while True:
+        screen.fill(BLACK)
+        screen.blit(pause_text, (size[0] // 2 - pause_text.get_width() // 2, size[1] // 3))
+        screen.blit(resume_text, (size[0] // 2 - resume_text.get_width() // 2, size[1] // 2))
+        screen.blit(restart_text, (size[0] // 2 - restart_text.get_width() // 2, size[1] // 2 + 50))
+        screen.blit(start_menu_text, (size[0] // 2 - start_menu_text.get_width() // 2, size[1] // 2 + 100))
+        screen.blit(quit_text, (size[0] // 2 - quit_text.get_width() // 2, size[1] // 2 + 150))
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return "quit"
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_p:
+                    return "resume"
+                elif event.key == pygame.K_r:
+                    return "restart"
+                elif event.key == pygame.K_m:
+                    return "main_menu"
+                elif event.key == pygame.K_q:
+                    pygame.quit()
+                    return "quit"
+        clock.tick(60)
+
+
 
 # Function to display the "Game Over" message and handle restarting the game
 def game_over(screen, clock):
@@ -193,6 +275,36 @@ def game_over(screen, clock):
                     return True
         clock.tick(60)
 
+
+def save_high_score(score):
+    with open("high_scores.txt", "a") as file:
+        file.write(str(score) + "\n")
+
+
+def load_high_scores():
+    try:
+        with open("high_scores.txt", "r") as file:
+            high_scores = [int(line.strip()) for line in file.readlines()]
+            high_scores.sort(reverse=True)
+            return high_scores
+    except FileNotFoundError:
+        return []
+
+
+def display_high_scores(screen, high_scores):
+    font = pygame.font.Font(None, 36)
+    title = font.render("High Scores:", True, WHITE)
+    screen.blit(title, (size[0] // 2 - title.get_width() // 2, 100))  # Changed Y-coordinate
+
+    for index, score in enumerate(high_scores[:5]):  # Show only the top 5 scores
+        score_text = font.render(f"{index + 1}. {score}", True, WHITE)
+        screen.blit(score_text, (size[0] // 2 - score_text.get_width() // 2, 150 + 30 * index))  # Changed Y-coordinate
+
+
+# Call the main menu before the game loop
+if not main_menu(screen, clock):
+    done = True
+
 while not done:
     # Handle events
     for event in pygame.event.get():
@@ -202,7 +314,34 @@ while not done:
             enemy = Enemy()
             enemies.add(enemy)
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_p:
+                pause_result = pause_menu(screen, clock)
+                if pause_result == "quit":
+                    done = True
+                    break
+                elif pause_result == "restart":
+                    player = Player()
+                    bullets.empty()
+                    enemies.empty()
+                    score.reset()
+                    for i in range(5):
+                        enemy = Enemy()
+                        enemies.add(enemy)
+                    break
+                elif pause_result == "main_menu":
+                    player = Player()
+                    bullets.empty()
+                    enemies.empty()
+                    score.reset()
+                    main_menu_result = main_menu(screen, clock)
+                    if main_menu_result == "main":
+                        for i in range(5):
+                            enemy = Enemy()
+                            enemies.add(enemy)
+                    elif main_menu_result == "quit":
+                        done = True
+                        break
+            elif event.key == pygame.K_LEFT:
                 player.change_x = -5
             elif event.key == pygame.K_RIGHT:
                 player.change_x = 5
@@ -217,18 +356,19 @@ while not done:
                     direction = "right"
                 bullet = Bullet(player.rect.centerx, player.rect.centery, direction)
                 bullets.add(bullet)
-        elif event.type == pygame.KEYUP:
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                player.change_x = 0
 
     # Check for collisions with enemies
     enemy_hit_list = pygame.sprite.spritecollide(player, enemies, False)
     if enemy_hit_list:
+        total_score = score.time_score + score.enemy_score
+        save_high_score(total_score)
         # The player character dies when it collides with an enemy
         if game_over(screen, clock):
             # Reset the game state (player, enemies, platforms, bullets, etc.)
             player = Player()
+            bullets.empty()
             enemies.empty()
+            score.reset()
             for i in range(5):
                 enemy = Enemy()
                 enemies.add(enemy)
@@ -240,13 +380,6 @@ while not done:
     platforms.update()
     enemies.update()
     bullets.update()
-
-    # Check for collisions between bullets and enemies
-    for bullet in bullets:
-        enemy_hit_list = pygame.sprite.spritecollide(bullet, enemies, True)
-        for enemy in enemy_hit_list:
-            score.add_points(10)  # Increment score by 10 for each enemy killed
-            bullets.remove(bullet)
 
     # Draw the screen
     screen.fill(BLACK)
