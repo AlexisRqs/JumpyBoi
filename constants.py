@@ -7,4 +7,4 @@ BLUE = (0, 0, 255)
 
 # Screen size and caption
 SCREEN_SIZE = (700, 500)
-CAPTION = "Jumpy v.0.4.0"
+CAPTION: str = "Jumpy v.0.4.0"

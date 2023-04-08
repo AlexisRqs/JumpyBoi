@@ -189,7 +189,7 @@ pygame.time.set_timer(SPAWN_ENEMY_EVENT, 10000)  # 10000 milliseconds = 10 secon
 
 def main_menu(screen, clock):
     font = pygame.font.Font(None, 36)
-    title = font.render("Jumpy v.0.3.1", True, WHITE)
+    title = font.render(CAPTION, True, WHITE)
     start_text = font.render("Press 'S' to Start", True, WHITE)
     quit_text = font.render("Press 'Q' to Quit", True, WHITE)
 
